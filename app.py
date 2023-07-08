@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request
+from flask_cors import CORS
 import os
 import pickle
 from google.auth.transport.requests import Request
@@ -13,6 +14,7 @@ SCOPES = ['https://www.googleapis.com/auth/gmail.modify']
 
 # Create the Flask application
 app = Flask(__name__)
+CORS(app)
 
 # Route for the home page
 @app.route('/', methods=['GET', 'POST'])
