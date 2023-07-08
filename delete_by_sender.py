@@ -4,7 +4,7 @@ from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
-# Define the email address of the sender you want to delete emails from
+# Define the email address of the sender you want to move emails from
 sender_email = input("Enter sender email: ")
 
 # If modifying the scopes, delete the token.pickle file.
@@ -26,7 +26,7 @@ def get_credentials():
             pickle.dump(creds, token)
     return creds
 
-def delete_emails():
+def move_emails_to_trash():
     creds = get_credentials()
     service = build('gmail', 'v1', credentials=creds)
     
@@ -38,13 +38,16 @@ def delete_emails():
         print('No matching emails found.')
         return
     
-    print(f'Deleting {len(messages)} emails...')
+    print(f'Moving {len(messages)} emails to trash...')
     
+    batch = service.new_batch_http_request()
+
     for message in messages:
-        service.users().messages().modify(userId='me', id=message['id'], body={'removeLabelIds': ['INBOX']}).execute()
+        message_id = message['id']
+        batch.add(service.users().messages().modify(userId='me', id=message_id, body={'removeLabelIds': ['INBOX'], 'addLabelIds': ['TRASH']}))
     
-    print('Emails deleted successfully.')
+    batch.execute()
+    
+    print('Emails moved to trash successfully.')
 
-delete_emails()
-
-
+move_emails_to_trash()
